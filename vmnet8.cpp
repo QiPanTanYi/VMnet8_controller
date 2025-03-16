@@ -7,11 +7,16 @@ using namespace std;
 
 int main() {
     string command = "netsh interface set interface \"VMware Network Adapter VMnet8\" admin=";
-    string admin = "disable"; // 初始状态为禁用
+    string admin = "disable"; // 默认设置为禁用
 
-    // 检查当前状态
-    system("netsh interface show interface \"VMware Network Adapter VMnet8\" > temp.txt");
-    FILE* fp = fopen("temp.txt", "r");
+    // 获取当前状态
+    system("netsh interface show interface \"VMware Network Adapter VMnet8\" > statu.txt");
+    FILE* fp = fopen("statu.txt", "r");
+    if (!fp) {
+        cerr << "无法读取 statu.txt" << endl;
+        return 1;
+    }
+
     char line[200];
     while (fgets(line, sizeof(line), fp)) {
         if (strstr(line, "已启用")) {
@@ -25,6 +30,12 @@ int main() {
     // 切换状态
     command += admin;
     system(command.c_str());
+
+    // 确保状态已经变更
+    Sleep(500);
+
+    // 再次获取最新状态
+    system("netsh interface show interface \"VMware Network Adapter VMnet8\" > statu.txt");
 
     return 0;
 }
